@@ -23,7 +23,7 @@ def buscar_mision(mision: str):
     file_name = data["response"]["docs"][0]["FILE_NAME"]
     url = data['response']['docs'][0]["ATLAS_THUMBNAIL_URL"]
     tiff_name = file_name.rsplit(".", 1)[0] + ".tiff"
-    convertir_jpeg_url_a_tiff(url, tiff_name)
+    convertir_img_url_a_tiff(url, tiff_name)
 
 def buscar_imagen(name: str):
     r = requests.get(f"{BASE_URL}/?image_content={name}", timeout=60)
@@ -122,5 +122,49 @@ def convertir_jp2_url_a_tiff(url: str, tiff_name: str) -> Path:
     print(f"Convertido a {tiff_path}")
     return tiff_path
 
+
+def convertir_img_url_a_tiff(url_imagen: str, nombre_salida: str) -> Path:
+    """
+    Descarga una imagen (de cualquier formato compatible con Pillow)
+    desde una URL y la guarda en formato TIFF.
+
+    Parámetros:
+        url_imagen (str): URL de la imagen.
+        nombre_salida (str): Nombre del archivo de salida (sin ruta ni extensión).
+
+    Retorna:
+        Path: Ruta del archivo TIFF generado.
+
+    Requiere:
+        pip install Pillow requests
+    """
+
+    # Carpeta fija: ../../tiff relativa a este archivo
+    output_dir = Path(__file__).resolve().parents[2] / "tiff"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    base = Path(nombre_salida).stem
+    tiff_path = output_dir / f"{base}.tiff"
+
+    Image.MAX_IMAGE_PIXELS = None  # evita errores por imágenes grandes
+
+    # 1) Descargar la imagen
+    print(f"Descargando imagen genérica desde {url_imagen}")
+    resp = requests.get(url_imagen, timeout=120)
+    resp.raise_for_status()
+
+    # 2) Abrir con PIL
+    with Image.open(BytesIO(resp.content)) as img:
+        img.load()
+
+        # 3) Convertir a modo compatible si es necesario
+        if img.mode not in ("1", "L", "RGB", "RGBA", "CMYK"):
+            img = img.convert("RGB")
+
+        # 4) Guardar como TIFF con compresión LZW
+        img.save(tiff_path, format="TIFF", compression="tiff_lzw")
+
+    print(f"Convertido a {tiff_path}")
+    return tiff_path
 # Ejemplo:
 buscar_mision("mars*science*laboratory")
