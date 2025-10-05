@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1306</width>
+    <width>1226</width>
     <height>704</height>
    </rect>
   </property>
@@ -176,7 +176,7 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -523,13 +523,6 @@
             </layout>
            </widget>
           </item>
-          <item>
-           <widget class="QScrollBar" name="verticalScrollBar">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -631,7 +624,7 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>213</width>
+                 <width>192</width>
                  <height>20</height>
                 </size>
                </property>
@@ -718,7 +711,7 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <layout class="QVBoxLayout" name="verticalLayout_8">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -735,20 +728,26 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QFrame" name="listaImagenes">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOn</enum>
             </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QScrollBar" name="verticalScrollBar_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
+            <property name="widgetResizable">
+             <bool>true</bool>
             </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>220</width>
+               <height>628</height>
+              </rect>
+             </property>
+            </widget>
            </widget>
           </item>
          </layout>
