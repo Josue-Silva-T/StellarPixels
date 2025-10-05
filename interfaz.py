@@ -26,7 +26,31 @@ class ImageViewer(QtWidgets.QGraphicsView):
         self.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
         self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.setDragMode(QtWidgets.QGraphicsView.NoDrag)  # moviento bloqueado por defecto
         self.scale_factor = 1.0
+        
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+
+    def zoom_in(self):
+        zoom_factor = 1.25
+        self.scale(zoom_factor, zoom_factor)
+        self.scale_factor *= zoom_factor
+
+    def zoom_out(self):
+        zoom_factor = 1 / 1.25
+        self.scale(zoom_factor, zoom_factor)
+        self.scale_factor *= zoom_factor
+
+    def refresh_zoom(self):
+        """Restaura el tamaño original"""
+        self.resetTransform()
+        bounds = self.scene.itemsBoundingRect()
+        self.scene.setSceneRect(bounds)
+        self.fitInView(bounds, QtCore.Qt.KeepAspectRatio)
+        self.scale_factor = 1.0
+        
 
     def load_image(self, image_path):
         """Carga una imagen TIFF con máxima calidad"""
@@ -37,8 +61,11 @@ class ImageViewer(QtWidgets.QGraphicsView):
 
         pixmap = QtGui.QPixmap.fromImage(image)
         self.scene.clear()
-        self.scene.addPixmap(pixmap)
-        self.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        item = self.scene.addPixmap(pixmap)
+        bounds = self.scene.itemsBoundingRect()
+        self.scene.setSceneRect(bounds)
+
+        self.fitInView(bounds, QtCore.Qt.KeepAspectRatio)
         self.scale_factor = 1.0
 
     def wheelEvent(self, event):
@@ -172,11 +199,13 @@ class Ui_MainWindow(object):
         self.bttnCursor.setIcon(icon)
         self.bttnCursor.setObjectName("bttnCursor")
         self.horizontalLayout_4.addWidget(self.bttnCursor)
+        self.bttnCursor.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.NoDrag))
         self.bttnMover = QtWidgets.QToolButton(self.frame)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap("iconos/flechas.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.bttnMover.setIcon(icon1)
         self.bttnMover.setObjectName("bttnMover")
+        self.bttnMover.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag))
         self.horizontalLayout_4.addWidget(self.bttnMover)
         self.bttnCortar = QtWidgets.QToolButton(self.frame)
         icon2 = QtGui.QIcon()
@@ -392,7 +421,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.addWidget(self.controles)
 
         self.imagen = QtWidgets.QFrame(self.panelCentral)
-        
+
         self.imagen.setFrameShape(QtWidgets.QFrame.Box)
         self.imagen.setFrameShadow(QtWidgets.QFrame.Raised)
         self.imagen.setObjectName("imagen")
@@ -441,11 +470,30 @@ class Ui_MainWindow(object):
         self.verticalLayout.setStretch(0, 1)
         self.verticalLayout.setStretch(1, 9)
         MainWindow.setCentralWidget(self.centralwidget)
+        
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        self.viewer.load_image("imagen.tif")
+        self.viewer.load_image("imagenes/marte.tiff")
+        self.viewer.resetTransform()
+        self.viewer.fitInView(self.viewer.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+
+        self.zoomIn.clicked.connect(self.viewer.zoom_in)
+        self.zoomOut.clicked.connect(self.viewer.zoom_out)
+        self.refresh.clicked.connect(self.viewer.refresh_zoom)
+
+        self.zoomIn.clicked.connect(lambda: [self.viewer.zoom_in(), self.update_zoom_label()])
+        self.zoomOut.clicked.connect(lambda: [self.viewer.zoom_out(), self.update_zoom_label()])
+        self.refresh.clicked.connect(lambda: [self.viewer.refresh_zoom(), self.update_zoom_label()])
+
+        self.bttnCursor.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.NoDrag))
+        self.bttnMover.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag))
+
+    def update_zoom_label(self):
+        porcentaje = int(self.viewer.scale_factor*100)
+        self.zoom.setText(f"{porcentaje}%")
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
