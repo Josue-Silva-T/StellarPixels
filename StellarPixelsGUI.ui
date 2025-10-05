@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>1306</width>
-    <height>856</height>
+    <height>704</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,7 +57,7 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="6,2,1">
+      <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="8,2">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -65,7 +68,7 @@
         <number>0</number>
        </property>
        <property name="rightMargin">
-        <number>0</number>
+        <number>10</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
@@ -129,54 +132,6 @@
             </property>
             <property name="text">
              <string>Buscar</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="frameMinCerr">
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_8">
-          <item>
-           <widget class="QToolButton" name="toolButton_7">
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>iconos/abajo-a-la-izquierda-y-arriba-a-la-derecha-hasta-el-centro.png</normaloff>iconos/abajo-a-la-izquierda-y-arriba-a-la-derecha-hasta-el-centro.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="toolButton_8">
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>iconos/maximizar-ventana.png</normaloff>iconos/maximizar-ventana.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="toolButton_9">
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>iconos/cruz.png</normaloff>iconos/cruz.png</iconset>
             </property>
            </widget>
           </item>
@@ -249,22 +204,7 @@
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,6">
-             <property name="spacing">
-              <number>0</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
+            <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,6,3">
              <item>
               <widget class="QFrame" name="panelBotones">
                <property name="frameShape">
@@ -273,53 +213,67 @@
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
                </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_4">
-                <property name="spacing">
-                 <number>0</number>
-                </property>
-                <property name="leftMargin">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <property name="rightMargin">
-                 <number>0</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>0</number>
-                </property>
+               <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,2">
                 <item>
-                 <widget class="QToolButton" name="bttnCursor">
-                  <property name="text">
-                   <string>...</string>
+                 <widget class="QLabel" name="label">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
                   </property>
-                  <property name="icon">
-                   <iconset>
-                    <normaloff>iconos/flecha-de-ubicacion.png</normaloff>iconos/flecha-de-ubicacion.png</iconset>
+                  <property name="styleSheet">
+                   <string notr="true">color:rgb(255, 255, 255)</string>
+                  </property>
+                  <property name="text">
+                   <string>Herramientas</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QToolButton" name="bttnCortar">
-                  <property name="text">
-                   <string>...</string>
+                 <widget class="QFrame" name="frame">
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
                   </property>
-                  <property name="icon">
-                   <iconset>
-                    <normaloff>iconos/cultivo-de-herramientas.png</normaloff>iconos/cultivo-de-herramientas.png</iconset>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
                   </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QToolButton" name="bttnMover">
-                  <property name="text">
-                   <string>...</string>
-                  </property>
-                  <property name="icon">
-                   <iconset>
-                    <normaloff>iconos/flechas.png</normaloff>iconos/flechas.png</iconset>
-                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_4">
+                   <item>
+                    <widget class="QToolButton" name="bttnCursor">
+                     <property name="text">
+                      <string>...</string>
+                     </property>
+                     <property name="icon">
+                      <iconset>
+                       <normaloff>iconos/flecha-de-ubicacion.png</normaloff>iconos/flecha-de-ubicacion.png</iconset>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="bttnMover">
+                     <property name="text">
+                      <string>...</string>
+                     </property>
+                     <property name="icon">
+                      <iconset>
+                       <normaloff>iconos/flechas.png</normaloff>iconos/flechas.png</iconset>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="bttnCortar">
+                     <property name="text">
+                      <string>...</string>
+                     </property>
+                     <property name="icon">
+                      <iconset>
+                       <normaloff>iconos/cultivo-de-herramientas.png</normaloff>iconos/cultivo-de-herramientas.png</iconset>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </widget>
                 </item>
                </layout>
@@ -333,7 +287,24 @@
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,4,0,4,0,4">
+               <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,1,1,1,1,1,1,1,1">
+                <item>
+                 <widget class="QLabel" name="subtituloSliders">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color:rgb(255, 255, 255)</string>
+                  </property>
+                  <property name="text">
+                   <string>Ajustes</string>
+                  </property>
+                 </widget>
+                </item>
                 <item>
                  <widget class="QLabel" name="lblBrillo">
                   <property name="font">
@@ -423,6 +394,127 @@
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="panelPropiedades">
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,4">
+                <item>
+                 <widget class="QLabel" name="propiedadesSubtitulo">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color:rgb(255, 255, 255)</string>
+                  </property>
+                  <property name="text">
+                   <string>Propiedades</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="panelInfo">
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QGridLayout" name="gridLayout" columnstretch="2,1">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="lblAncho">
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(255, 255, 255)</string>
+                     </property>
+                     <property name="text">
+                      <string>Ancho:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QLabel" name="anchoValor">
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(255, 255, 255)</string>
+                     </property>
+                     <property name="text">
+                      <string>ejemplo</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="lblAlto">
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(255, 255, 255)</string>
+                     </property>
+                     <property name="text">
+                      <string>Alto:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QLabel" name="altoValor">
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(255, 255, 255)</string>
+                     </property>
+                     <property name="text">
+                      <string>ejemplo</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="QLabel" name="lblColor">
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(255, 255, 255)</string>
+                     </property>
+                     <property name="text">
+                      <string>Modo de color:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="1">
+                    <widget class="QLabel" name="colorValor">
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(255, 255, 255)</string>
+                     </property>
+                     <property name="text">
+                      <string>ejemplo</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="lblResolucion">
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(255, 255, 255)</string>
+                     </property>
+                     <property name="text">
+                      <string>Resolucion:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="1">
+                    <widget class="QLabel" name="resolucionValor">
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(255, 255, 255)</string>
+                     </property>
+                     <property name="text">
+                      <string>ejemplo</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </widget>
                 </item>
                </layout>
@@ -589,6 +681,26 @@
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
+            <layout class="QVBoxLayout" name="verticalLayout_7">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QGraphicsView" name="graphicsView"/>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
