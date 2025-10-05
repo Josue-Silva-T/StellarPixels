@@ -8,6 +8,8 @@ def preprocess(text):
     return text
 
 def compare(textC, examU):
+    text1 = ""
+    text2 = ""
     text1 = preprocess(textC)
     text2 = preprocess(examU)
 

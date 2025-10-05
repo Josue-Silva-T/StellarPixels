@@ -14,7 +14,13 @@ from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5.QtCore import Qt
 from PIL import Image, ImageEnhance
 import sys
+import herramientas.similitud
 import io
+
+diccionario = open("recursos/Diccionario.txt")
+
+palabras = diccionario.read()
+palabras = palabras.split(",")
 
 class ImageViewer(QtWidgets.QGraphicsView):
     # Señala cuando se hace zoom
@@ -159,7 +165,7 @@ class ImageViewer(QtWidgets.QGraphicsView):
         """Activa/Desactiva el modo recorte con QRubberBand."""
         self._crop_mode = enabled
         if enabled:
-            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)  # 🔒 bloquear movimiento
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)  # bloquear movimiento
             self.setCursor(Qt.CrossCursor)
             if self._rubber is None:
                 self._rubber = QtWidgets.QRubberBand(QtWidgets.QRubberBand.Rectangle, self.viewport())
@@ -651,15 +657,15 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        self.viewer.load_image("Imagenes/marte.tiff")
+        self.viewer.load_image("imagenes/marte.tiff")
         self.viewer.refresh_zoom()
         self.update_zoom_label()
         
         self.zoomIn.clicked.connect(self.viewer.zoom_in)
         self.zoomOut.clicked.connect(self.viewer.zoom_out)
-        #self.refresh.clicked.connect(self.viewer.refresh_zoom)
-        self.refresh.clicked.disconnect() if self.refresh.receivers(self.refresh.clicked) else None
-        self.refresh.clicked.connect(self._on_refresh_clicked)
+        self.refresh.clicked.connect(self.viewer.refresh_zoom)
+
+
 
         self.bttnCursor.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.NoDrag))
         self.bttnMover.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag))
@@ -678,13 +684,22 @@ class Ui_MainWindow(object):
         porcentaje = int(self.viewer.scale_factor*100)
         self.zoom.setText(f"{porcentaje}%")
 
+    def obtener_texto(self):
+        i = 0
+        busca = self.lineEdit.text()
+        print(len(palabras))
+        while i < len(palabras):
+            result = herramientas.similitud.compare(busca, palabras[i])
+            print(f"{palabras[i]} = {result}")
+            i +=1
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.lblTitulo.setText(_translate("MainWindow", "STELLAR PIXELS"))
         self.lineEdit.setText(_translate("MainWindow", "Buscar"))
-        self.label.setText(_translate("MainWindow", "Herramientas"))
+        self.label.setText(_translate("MainWindow", "Hserramientas"))
         self.bttnCursor.setText(_translate("MainWindow", "..."))
         self.bttnMover.setText(_translate("MainWindow", "..."))
         self.bttnCortar.setText(_translate("MainWindow", "..."))
@@ -732,6 +747,7 @@ class Ui_MainWindow(object):
 
 
 if __name__ == "__main__":
+
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
