@@ -12,14 +12,29 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5.QtCore import Qt
-from PIL import Image
+from PIL import Image, ImageEnhance
 import sys
+import io
 
 class ImageViewer(QtWidgets.QGraphicsView):
+    # Señala cuando se hace zoom
     zoomChanged = QtCore.pyqtSignal()
+    # Señala cuando finaliza un recorte
     cropFinished = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
+        self.pil_orig = None      # PIL.Image original
+        self.qimage = None        # QImage de trabajo (para recortes)
+        self.pixmap_item = None   # item en escena
+
+        # Estado de ajustes (rango -100..100)
+        self._adj = {
+            "brightness": 0,
+            "contrast": 0,
+            "exposure": 0,
+            "saturation": 0,
+        }
+        
         super(ImageViewer, self).__init__(parent)
         self.scene = QtWidgets.QGraphicsScene(self)
         self.setScene(self.scene)
@@ -63,20 +78,22 @@ class ImageViewer(QtWidgets.QGraphicsView):
         self.zoomChanged.emit()
         
     def load_image(self, image_path):
-        """Carga una imagen TIFF con máxima calidad"""
-        image = QtGui.QImage(image_path)
-        if image.isNull():
-            QtWidgets.QMessageBox.warning(self, "Error", f"No se pudo abrir la imagen:\n{image_path}")
-            return
+        # Cargar con PIL para tener control total
+        pil = Image.open(image_path).convert("RGB")
+        self.pil_orig = pil
+
+        # Mostrar en escena
+        qimg = self._pil_to_qimage(pil)
+        self.qimage = qimg
 
         self.scene.clear()
-        self.qimage = image
-        self.pixmap_item = self.scene.addPixmap(QtGui.QPixmap.fromImage(image))
-
+        self.pixmap_item = self.scene.addPixmap(QtGui.QPixmap.fromImage(qimg))
         bounds = self.scene.itemsBoundingRect()
         self.scene.setSceneRect(bounds)
         self.fitInView(bounds, QtCore.Qt.KeepAspectRatio)
         self.scale_factor = 1.0
+        self.zoomChanged.emit()
+
 
     def wheelEvent(self, event):
         if self._crop_mode:
@@ -150,8 +167,85 @@ class ImageViewer(QtWidgets.QGraphicsView):
             self.setCursor(Qt.ArrowCursor)
             if self._rubber:
                 self._rubber.hide()
+    
+    # Convierte PIL.Image RGB a QImage RGB888            
+    def _pil_to_qimage(self, pil_img: Image.Image) -> QtGui.QImage:
+        if pil_img.mode != "RGB":
+            pil_img = pil_img.convert("RGB")
+        data = pil_img.tobytes("raw", "RGB")
+        w, h = pil_img.size
+        return QtGui.QImage(data, w, h, 3*w, QtGui.QImage.Format_RGB888)
 
+    def _apply_exposure(self, pil_img: Image.Image, v: int) -> Image.Image:
+        if v == 0:
+            return pil_img
+        gamma = 2 ** (-v / 100.0)  # v=+100 -> gamma=0.5 (más brillante)
+        lut = [int((i/255.0) ** gamma * 255 + 0.5) for i in range(256)]
+        return pil_img.point(lut * 3)  # RGB
 
+    def _apply_adjustments(self) -> Image.Image:
+        
+        img = self.pil_orig
+        if img is None:
+            return None
+
+        b = self._adj["brightness"]   # -100..100
+        c = self._adj["contrast"]
+        e = self._adj["exposure"]
+        s = self._adj["saturation"]
+
+        if e != 0:
+            img = self._apply_exposure(img, e)
+
+        if b != 0:
+            factor = 1.0 + (b / 100.0)       # 0.0 .. 2.0  (0 => negro, 1 => original, 2 => +100)
+            img = ImageEnhance.Brightness(img).enhance(factor)
+
+        if c != 0:
+            factor = 1.0 + (c / 100.0)
+            img = ImageEnhance.Contrast(img).enhance(factor)
+
+        if s != 0:
+            factor = 1.0 + (s / 100.0)
+            img = ImageEnhance.Color(img).enhance(factor)
+
+        return img
+    
+    def set_adjustments(self, brightness: int=None, contrast: int=None,
+                    exposure: int=None, saturation: int=None):
+        """Actualiza cualquier ajuste (en -100..100) y repinta."""
+        if brightness is not None: self._adj["brightness"] = int(brightness)
+        if contrast   is not None: self._adj["contrast"]   = int(contrast)
+        if exposure   is not None: self._adj["exposure"]   = int(exposure)
+        if saturation is not None: self._adj["saturation"] = int(saturation)
+
+        if self.pil_orig is None:
+            return
+
+        pil = self._apply_adjustments()
+        if pil is None:
+            return
+
+        qimg = self._pil_to_qimage(pil)
+        self.qimage = qimg  # mantenerlo para funciones como recorte
+        # Actualizar pixmap sin perder zoom/pos:
+        if self.pixmap_item is None:
+            self.pixmap_item = self.scene.addPixmap(QtGui.QPixmap.fromImage(qimg))
+        else:
+            self.pixmap_item.setPixmap(QtGui.QPixmap.fromImage(qimg))
+        # No hacemos fitInView aquí para no “saltar” la vista
+        
+    def reset_adjustments(self):
+        """Resetea sliders/ajustes y repinta la imagen original."""
+        self._adj = {k: 0 for k in self._adj}
+        if self.pil_orig is None:
+            return
+        qimg = self._pil_to_qimage(self.pil_orig)
+        self.qimage = qimg
+        if self.pixmap_item is None:
+            self.pixmap_item = self.scene.addPixmap(QtGui.QPixmap.fromImage(qimg))
+        else:
+            self.pixmap_item.setPixmap(QtGui.QPixmap.fromImage(qimg))
 
 
 class Ui_MainWindow(object):
@@ -505,8 +599,20 @@ class Ui_MainWindow(object):
         self.viewer = ImageViewer(self.imagen)
         self.viewer.zoomChanged.connect(self.update_zoom_label)
         self.viewer.setObjectName("viewer")
-        self.verticalLayout_7.addWidget(self.viewer)
+        
+        # Configurar rango y valor inicial
+        for s in (self.sldrBrillo, self.sldrContraste, self.sldrExposicion, self.sldrSaturacion):
+            s.setMinimum(-100)
+            s.setMaximum(100)
+            s.setValue(0)
 
+        # Conectar cambios a un slot común
+        self.sldrBrillo.valueChanged.connect(self._on_adjust_changed)
+        self.sldrContraste.valueChanged.connect(self._on_adjust_changed)
+        self.sldrExposicion.valueChanged.connect(self._on_adjust_changed)
+        self.sldrSaturacion.valueChanged.connect(self._on_adjust_changed)
+        
+        self.verticalLayout_7.addWidget(self.viewer)
         self.verticalLayout_6.addWidget(self.imagen)
 
 
@@ -551,9 +657,9 @@ class Ui_MainWindow(object):
         
         self.zoomIn.clicked.connect(self.viewer.zoom_in)
         self.zoomOut.clicked.connect(self.viewer.zoom_out)
-        self.refresh.clicked.connect(self.viewer.refresh_zoom)
-
-
+        #self.refresh.clicked.connect(self.viewer.refresh_zoom)
+        self.refresh.clicked.disconnect() if self.refresh.receivers(self.refresh.clicked) else None
+        self.refresh.clicked.connect(self._on_refresh_clicked)
 
         self.bttnCursor.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.NoDrag))
         self.bttnMover.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag))
@@ -564,7 +670,7 @@ class Ui_MainWindow(object):
             self.bttnCortar.setChecked(False)
         ))
         
-        # Ajusta la imagen bien
+        # Ajusta la imagen correctamente al iniciar el programa
         QtCore.QTimer.singleShot(0, lambda: (self.viewer.refresh_zoom(), self.update_zoom_label()))
         
 
@@ -602,6 +708,27 @@ class Ui_MainWindow(object):
         self.refresh.setText(_translate("MainWindow", "..."))
         self.compartir.setText(_translate("MainWindow", "Compartir"))
         self.exportar.setText(_translate("MainWindow", "Exportar"))
+        
+    def _on_adjust_changed(self, _value):
+        # Leer valores actuales y aplicar todos juntos (evita pipeline sobre pipeline)
+        b = self.sldrBrillo.value()
+        c = self.sldrContraste.value()
+        e = self.sldrExposicion.value()
+        s = self.sldrSaturacion.value()
+        self.viewer.set_adjustments(brightness=b, contrast=c, exposure=e, saturation=s)
+        
+    def _on_refresh_clicked(self):
+            # 1) Resetear sliders -> repinta a original
+            self.sldrBrillo.setValue(0)
+            self.sldrContraste.setValue(0)
+            self.sldrExposicion.setValue(0)
+            self.sldrSaturacion.setValue(0)
+            self.viewer.reset_adjustments()
+
+            # 2) Ajustar vista/zoom
+            self.viewer.refresh_zoom()
+            self.update_zoom_label()
+
 
 
 if __name__ == "__main__":
