@@ -16,6 +16,8 @@ from PIL import Image
 import sys
 
 class ImageViewer(QtWidgets.QGraphicsView):
+    zoomChanged = QtCore.pyqtSignal()
+    
     def __init__(self, parent=None):
         super(ImageViewer, self).__init__(parent)
         self.scene = QtWidgets.QGraphicsScene(self)
@@ -37,11 +39,13 @@ class ImageViewer(QtWidgets.QGraphicsView):
         zoom_factor = 1.25
         self.scale(zoom_factor, zoom_factor)
         self.scale_factor *= zoom_factor
+        self.zoomChanged.emit()
 
     def zoom_out(self):
         zoom_factor = 1 / 1.25
         self.scale(zoom_factor, zoom_factor)
         self.scale_factor *= zoom_factor
+        self.zoomChanged.emit()
 
     def refresh_zoom(self):
         """Restaura el tamaño original"""
@@ -50,6 +54,7 @@ class ImageViewer(QtWidgets.QGraphicsView):
         self.scene.setSceneRect(bounds)
         self.fitInView(bounds, QtCore.Qt.KeepAspectRatio)
         self.scale_factor = 1.0
+        self.zoomChanged.emit()
         
 
     def load_image(self, image_path):
@@ -80,6 +85,7 @@ class ImageViewer(QtWidgets.QGraphicsView):
 
         self.scale(zoom_factor, zoom_factor)
         self.scale_factor *= zoom_factor
+        self.zoomChanged.emit()
 
 
 
@@ -433,6 +439,7 @@ class Ui_MainWindow(object):
 
         # Aquí reemplazamos el QGraphicsView por el visor personalizado
         self.viewer = ImageViewer(self.imagen)
+        self.viewer.zoomChanged.connect(self.update_zoom_label)
         self.viewer.setObjectName("viewer")
         self.verticalLayout_7.addWidget(self.viewer)
 
@@ -483,9 +490,7 @@ class Ui_MainWindow(object):
         self.zoomOut.clicked.connect(self.viewer.zoom_out)
         self.refresh.clicked.connect(self.viewer.refresh_zoom)
 
-        self.zoomIn.clicked.connect(lambda: [self.viewer.zoom_in(), self.update_zoom_label()])
-        self.zoomOut.clicked.connect(lambda: [self.viewer.zoom_out(), self.update_zoom_label()])
-        self.refresh.clicked.connect(lambda: [self.viewer.refresh_zoom(), self.update_zoom_label()])
+
 
         self.bttnCursor.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.NoDrag))
         self.bttnMover.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag))
