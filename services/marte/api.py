@@ -21,7 +21,7 @@ def buscar_imagen(name: str):
     data = r.json()
     respuestas = data["response"]["docs"]
 
-    for respuesta in respuestas:
+    for respuesta in respuestas[0]:
         url = respuesta.get("ATLAS_DATA_URL") or ""
         name_photo = respuesta.get("FILE_NAME_SPECIFICATION", "").split("/")[-1]
 
