@@ -21,7 +21,7 @@ def buscar_imagen(name: str):
     data = r.json()
     respuestas = data["response"]["docs"]
 
-    for respuesta in respuestas[0]:
+    for respuesta in respuestas:
         url = respuesta.get("ATLAS_DATA_URL") or ""
         name_photo = respuesta.get("FILE_NAME_SPECIFICATION", "").split("/")[-1]
 
@@ -38,6 +38,7 @@ def buscar_imagen(name: str):
         else:
             # opcional: si quieres seguir guardando las browse JPG/PNG
             convertir_jp2_url_a_tiff(url, name_photo)
+        break
 
 def guardar_memoria():
     pass
