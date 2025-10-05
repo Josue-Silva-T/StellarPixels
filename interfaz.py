@@ -663,7 +663,9 @@ class Ui_MainWindow(object):
         
         self.zoomIn.clicked.connect(self.viewer.zoom_in)
         self.zoomOut.clicked.connect(self.viewer.zoom_out)
-        self.refresh.clicked.connect(self.viewer.refresh_zoom)
+        self.refresh.clicked.disconnect() if self.refresh.receivers(self.refresh.clicked) else None
+        self.refresh.clicked.connect(self._on_refresh_clicked)
+
         self.lineEdit.returnPressed.connect(self.obtener_texto)
 
 
