@@ -45,7 +45,7 @@
     <item>
      <widget class="QFrame" name="frameSuperior">
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(13, 11, 55);
+       <string notr="true">background-color: rgb(24, 24, 24);
 </string>
       </property>
       <property name="frameShape">
@@ -78,7 +78,7 @@
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-color:rgb(2, 0, 61)</string>
+          <string notr="true"/>
          </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -113,7 +113,7 @@
        <item>
         <widget class="QFrame" name="frameBuscador">
          <property name="styleSheet">
-          <string notr="true">background-color:rgb(2, 0, 61)</string>
+          <string notr="true"/>
          </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -138,7 +138,7 @@
        <item>
         <widget class="QFrame" name="frameMinCerr">
          <property name="styleSheet">
-          <string notr="true">background-color:rgb(2, 0, 61)</string>
+          <string notr="true"/>
          </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -154,7 +154,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../../../Downloads/abajo-a-la-izquierda-y-arriba-a-la-derecha-hasta-el-centro (2).png</normaloff>../../../Downloads/abajo-a-la-izquierda-y-arriba-a-la-derecha-hasta-el-centro (2).png</iconset>
+              <normaloff>iconos/abajo-a-la-izquierda-y-arriba-a-la-derecha-hasta-el-centro.png</normaloff>iconos/abajo-a-la-izquierda-y-arriba-a-la-derecha-hasta-el-centro.png</iconset>
             </property>
            </widget>
           </item>
@@ -165,7 +165,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../../../Downloads/maximizar-ventana.png</normaloff>../../../Downloads/maximizar-ventana.png</iconset>
+              <normaloff>iconos/maximizar-ventana.png</normaloff>iconos/maximizar-ventana.png</iconset>
             </property>
            </widget>
           </item>
@@ -176,7 +176,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../../../Downloads/cruz.png</normaloff>../../../Downloads/cruz.png</iconset>
+              <normaloff>iconos/cruz.png</normaloff>iconos/cruz.png</iconset>
             </property>
            </widget>
           </item>
@@ -213,7 +213,7 @@
        <item>
         <widget class="QFrame" name="panelHerramientas">
          <property name="styleSheet">
-          <string notr="true">background:rgb(0, 9, 78)</string>
+          <string notr="true">background:rgb(14, 14, 14)</string>
          </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -240,7 +240,7 @@
           <item>
            <widget class="QFrame" name="seccionesControles">
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(0, 9, 78)
+             <string notr="true">background-color: rgb(34, 34, 34)
 </string>
             </property>
             <property name="frameShape">
@@ -249,7 +249,7 @@
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,6">
+            <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,6">
              <property name="spacing">
               <number>0</number>
              </property>
@@ -265,16 +265,6 @@
              <property name="bottomMargin">
               <number>0</number>
              </property>
-             <item>
-              <widget class="QFrame" name="frame">
-               <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Raised</enum>
-               </property>
-              </widget>
-             </item>
              <item>
               <widget class="QFrame" name="panelBotones">
                <property name="frameShape">
@@ -306,7 +296,7 @@
                   </property>
                   <property name="icon">
                    <iconset>
-                    <normaloff>../../../Downloads/flecha-de-ubicacion.png</normaloff>../../../Downloads/flecha-de-ubicacion.png</iconset>
+                    <normaloff>iconos/flecha-de-ubicacion.png</normaloff>iconos/flecha-de-ubicacion.png</iconset>
                   </property>
                  </widget>
                 </item>
@@ -317,7 +307,7 @@
                   </property>
                   <property name="icon">
                    <iconset>
-                    <normaloff>../../../Downloads/cultivo-de-herramientas.png</normaloff>../../../Downloads/cultivo-de-herramientas.png</iconset>
+                    <normaloff>iconos/cultivo-de-herramientas.png</normaloff>iconos/cultivo-de-herramientas.png</iconset>
                   </property>
                  </widget>
                 </item>
@@ -328,7 +318,7 @@
                   </property>
                   <property name="icon">
                    <iconset>
-                    <normaloff>../../../Downloads/flechas.png</normaloff>../../../Downloads/flechas.png</iconset>
+                    <normaloff>iconos/flechas.png</normaloff>iconos/flechas.png</iconset>
                   </property>
                  </widget>
                 </item>
@@ -343,7 +333,7 @@
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,4,0,4,0,4,0,4">
+               <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,4,0,4,0,4">
                 <item>
                  <widget class="QLabel" name="lblBrillo">
                   <property name="font">
@@ -361,6 +351,9 @@
                 </item>
                 <item>
                  <widget class="QSlider" name="sldrBrillo">
+                  <property name="styleSheet">
+                   <string notr="true"/>
+                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -481,21 +474,21 @@
                 <item>
                  <widget class="QToolButton" name="zoomOut">
                   <property name="styleSheet">
-                   <string notr="true">background-color:rgb(0, 9, 78)</string>
+                   <string notr="true">background-color:rgb(24, 24, 24)</string>
                   </property>
                   <property name="text">
                    <string>...</string>
                   </property>
                   <property name="icon">
                    <iconset>
-                    <normaloff>../../../Downloads/alejar.png</normaloff>../../../Downloads/alejar.png</iconset>
+                    <normaloff>iconos/alejar.png</normaloff>iconos/alejar.png</iconset>
                   </property>
                  </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="zoom">
                   <property name="styleSheet">
-                   <string notr="true">background-color:rgb(0, 9, 78); color:rgb(255, 255, 255)</string>
+                   <string notr="true">background-color:rgb(24, 24, 24); color:rgb(255, 255, 255)</string>
                   </property>
                   <property name="frameShape">
                    <enum>QFrame::NoFrame</enum>
@@ -511,28 +504,28 @@
                 <item>
                  <widget class="QToolButton" name="zoomIn">
                   <property name="styleSheet">
-                   <string notr="true">background-color:rgb(0, 9, 78)</string>
+                   <string notr="true">background-color:rgb(24, 24, 24)</string>
                   </property>
                   <property name="text">
                    <string>...</string>
                   </property>
                   <property name="icon">
                    <iconset>
-                    <normaloff>../../../Downloads/dar-un-golpe-de-zoom.png</normaloff>../../../Downloads/dar-un-golpe-de-zoom.png</iconset>
+                    <normaloff>iconos/dar-un-golpe-de-zoom.png</normaloff>iconos/dar-un-golpe-de-zoom.png</iconset>
                   </property>
                  </widget>
                 </item>
                 <item>
                  <widget class="QToolButton" name="refresh">
                   <property name="styleSheet">
-                   <string notr="true">background-color:rgb(0, 9, 78)</string>
+                   <string notr="true">background-color:rgb(24, 24, 24)</string>
                   </property>
                   <property name="text">
                    <string>...</string>
                   </property>
                   <property name="icon">
                    <iconset>
-                    <normaloff>../../../Downloads/gira-a-la-derecha.png</normaloff>../../../Downloads/gira-a-la-derecha.png</iconset>
+                    <normaloff>iconos/gira-a-la-derecha.png</normaloff>iconos/gira-a-la-derecha.png</iconset>
                   </property>
                  </widget>
                 </item>
@@ -564,7 +557,7 @@
                 <item>
                  <widget class="QPushButton" name="compartir">
                   <property name="styleSheet">
-                   <string notr="true">background-color:rgb(0, 9, 78); color:rgb(255, 255, 255)
+                   <string notr="true">background-color:rgb(24, 24, 24); color:rgb(255, 255, 255)
 </string>
                   </property>
                   <property name="text">
@@ -575,7 +568,7 @@
                 <item>
                  <widget class="QPushButton" name="exportar">
                   <property name="styleSheet">
-                   <string notr="true">background-color:rgb(0, 9, 78); color:rgb(255, 255, 255)</string>
+                   <string notr="true">background-color:rgb(24, 24, 24); color:rgb(255, 255, 255)</string>
                   </property>
                   <property name="text">
                    <string>Exportar</string>
@@ -604,7 +597,7 @@
        <item>
         <widget class="QFrame" name="panelScroll">
          <property name="styleSheet">
-          <string notr="true">background:rgb(0, 9, 78)
+          <string notr="true">background:rgb(34, 34, 34)
 </string>
          </property>
          <property name="frameShape">
@@ -630,7 +623,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QFrame" name="frame_7">
+           <widget class="QFrame" name="listaImagenes">
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
             </property>
