@@ -17,6 +17,7 @@ import sys
 
 class ImageViewer(QtWidgets.QGraphicsView):
     zoomChanged = QtCore.pyqtSignal()
+    cropFinished = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
         super(ImageViewer, self).__init__(parent)
@@ -34,7 +35,8 @@ class ImageViewer(QtWidgets.QGraphicsView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
-        self.pixmap_item = None      # <-- guardaremos el item
+        self.pixmap_item = None
+        self.qimage = None
         self._crop_mode = False
         self._rubber = None
         self._origin = QtCore.QPoint()
@@ -67,16 +69,19 @@ class ImageViewer(QtWidgets.QGraphicsView):
             QtWidgets.QMessageBox.warning(self, "Error", f"No se pudo abrir la imagen:\n{image_path}")
             return
 
-        pixmap = QtGui.QPixmap.fromImage(image)
         self.scene.clear()
-        item = self.scene.addPixmap(pixmap)
+        self.qimage = image
+        self.pixmap_item = self.scene.addPixmap(QtGui.QPixmap.fromImage(image))
+
         bounds = self.scene.itemsBoundingRect()
         self.scene.setSceneRect(bounds)
-
         self.fitInView(bounds, QtCore.Qt.KeepAspectRatio)
         self.scale_factor = 1.0
 
     def wheelEvent(self, event):
+        if self._crop_mode:
+            return  # sin zoom mientras recortas
+        
         """Zoom con la rueda del ratón"""
         zoom_in_factor = 1.25
         zoom_out_factor = 1 / zoom_in_factor
@@ -90,18 +95,62 @@ class ImageViewer(QtWidgets.QGraphicsView):
         self.scale_factor *= zoom_factor
         self.zoomChanged.emit()
         
+    def mousePressEvent(self, event):
+        if self._crop_mode and event.button() == Qt.LeftButton and self.pixmap_item:
+            self._origin = event.pos()
+            self._rubber.setGeometry(QtCore.QRect(self._origin, QtCore.QSize()))
+            self._rubber.show()
+            return
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if self._crop_mode and self._rubber and self._rubber.isVisible():
+            self._rubber.setGeometry(QtCore.QRect(self._origin, event.pos()).normalized())
+            return
+        super().mouseMoveEvent(event)
+    
+    def mouseReleaseEvent(self, event):
+        if self._crop_mode and event.button() == Qt.LeftButton and self._rubber and self._rubber.isVisible():
+            self._rubber.hide()
+
+            # 1) Rect seleccionado en coords de vista
+            view_rect = QtCore.QRect(self._origin, event.pos()).normalized()
+            if view_rect.width() < 3 or view_rect.height() < 3:
+                self.set_crop_mode(False)
+                self.cropFinished.emit()   # reactivar pan en el UI
+                return
+
+            # 2) Vista -> Escena -> Item -> Imagen
+            scene_rect = self.mapToScene(view_rect).boundingRect()
+            item_rect = self.pixmap_item.mapFromScene(scene_rect).boundingRect().toAlignedRect()
+
+            # 3) Limitar al tamaño real de la imagen
+            img_rect = QtCore.QRect(0, 0, self.qimage.width(), self.qimage.height())
+            crop_rect = item_rect.intersected(img_rect)
+            if not crop_rect.isEmpty():
+                cropped = self.qimage.copy(crop_rect)
+                QtWidgets.QApplication.clipboard().setImage(cropped)
+                QtWidgets.QToolTip.showText(self.mapToGlobal(event.pos()), "Recorte copiado al portapapeles")
+
+            # 4) Salir del modo recorte y avisar
+            self.set_crop_mode(False)
+            self.cropFinished.emit()
+            return
+        super().mouseReleaseEvent(event)
+        
     def set_crop_mode(self, enabled: bool):
-        """Activa/Desactiva el modo recorte (QRubberBand)."""
+        """Activa/Desactiva el modo recorte con QRubberBand."""
         self._crop_mode = enabled
         if enabled:
-            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)  # evita pan
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)  # 🔒 bloquear movimiento
             self.setCursor(Qt.CrossCursor)
-        if self._rubber is None:
-            self._rubber = QtWidgets.QRubberBand(QtWidgets.QRubberBand.Rectangle, self.viewport())
+            if self._rubber is None:
+                self._rubber = QtWidgets.QRubberBand(QtWidgets.QRubberBand.Rectangle, self.viewport())
         else:
             self.setCursor(Qt.ArrowCursor)
-        if self._rubber:
-            self._rubber.hide()
+            if self._rubber:
+                self._rubber.hide()
+
 
 
 
@@ -508,6 +557,12 @@ class Ui_MainWindow(object):
 
         self.bttnCursor.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.NoDrag))
         self.bttnMover.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag))
+        self.bttnCortar.setCheckable(True)
+        self.bttnCortar.toggled.connect(self.viewer.set_crop_mode)
+        self.viewer.cropFinished.connect(lambda: (
+            self.viewer.setDragMode(QtWidgets.QGraphicsView.NoDrag),
+            self.bttnCortar.setChecked(False)
+        ))
         
         # Ajusta la imagen bien
         QtCore.QTimer.singleShot(0, lambda: (self.viewer.refresh_zoom(), self.update_zoom_label()))
