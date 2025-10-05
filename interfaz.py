@@ -9,6 +9,51 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
+from PyQt5.QtGui import QPixmap, QImage, QPainter
+from PyQt5.QtCore import Qt
+from PIL import Image
+import sys
+
+class ImageViewer(QtWidgets.QGraphicsView):
+    def __init__(self, parent=None):
+        super(ImageViewer, self).__init__(parent)
+        self.scene = QtWidgets.QGraphicsScene(self)
+        self.setScene(self.scene)
+
+        # Configuración para alta calidad
+        self.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        self.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
+        self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+        self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.scale_factor = 1.0
+
+    def load_image(self, image_path):
+        """Carga una imagen TIFF con máxima calidad"""
+        image = QtGui.QImage(image_path)
+        if image.isNull():
+            QtWidgets.QMessageBox.warning(self, "Error", f"No se pudo abrir la imagen:\n{image_path}")
+            return
+
+        pixmap = QtGui.QPixmap.fromImage(image)
+        self.scene.clear()
+        self.scene.addPixmap(pixmap)
+        self.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.scale_factor = 1.0
+
+    def wheelEvent(self, event):
+        """Zoom con la rueda del ratón"""
+        zoom_in_factor = 1.25
+        zoom_out_factor = 1 / zoom_in_factor
+
+        if event.angleDelta().y() > 0:
+            zoom_factor = zoom_in_factor
+        else:
+            zoom_factor = zoom_out_factor
+
+        self.scale(zoom_factor, zoom_factor)
+        self.scale_factor *= zoom_factor
+
 
 
 class Ui_MainWindow(object):
@@ -345,18 +390,26 @@ class Ui_MainWindow(object):
         self.horizontalLayout_9.setStretch(1, 3)
         self.horizontalLayout_9.setStretch(2, 2)
         self.verticalLayout_6.addWidget(self.controles)
+
         self.imagen = QtWidgets.QFrame(self.panelCentral)
+        
         self.imagen.setFrameShape(QtWidgets.QFrame.Box)
         self.imagen.setFrameShadow(QtWidgets.QFrame.Raised)
         self.imagen.setObjectName("imagen")
+
         self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.imagen)
         self.verticalLayout_7.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_7.setSpacing(0)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
-        self.graphicsView = QtWidgets.QGraphicsView(self.imagen)
-        self.graphicsView.setObjectName("graphicsView")
-        self.verticalLayout_7.addWidget(self.graphicsView)
+
+        # Aquí reemplazamos el QGraphicsView por el visor personalizado
+        self.viewer = ImageViewer(self.imagen)
+        self.viewer.setObjectName("viewer")
+        self.verticalLayout_7.addWidget(self.viewer)
+
         self.verticalLayout_6.addWidget(self.imagen)
+
+
         self.verticalLayout_6.setStretch(0, 1)
         self.verticalLayout_6.setStretch(1, 9)
         self.horizontalLayout.addWidget(self.panelCentral)
@@ -391,6 +444,8 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+        self.viewer.load_image("imagen.tif")
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
