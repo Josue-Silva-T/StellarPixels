@@ -553,7 +553,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        self.viewer.load_image("Imagenes/marte.tiff")
+        self.viewer.load_image("imagenes/imagen2.tif")
         self.viewer.refresh_zoom()
         self.update_zoom_label()
         
