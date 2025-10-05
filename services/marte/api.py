@@ -15,6 +15,16 @@ def buscar_id(id: str):
     tiff_name = file_name.rsplit(".", 1)[0] + ".tiff"
     convertir_jpeg_url_a_tiff(url, tiff_name)
 
+def buscar_mision(mision: str):
+    r = requests.get(f"{BASE_URL}?mission={mision}", timeout=30)
+    r.raise_for_status()
+    data = r.json()
+    print(data)
+    file_name = data["response"]["docs"][0]["FILE_NAME"]
+    url = data['response']['docs'][0]["ATLAS_THUMBNAIL_URL"]
+    tiff_name = file_name.rsplit(".", 1)[0] + ".tiff"
+    convertir_jpeg_url_a_tiff(url, tiff_name)
+
 def buscar_imagen(name: str):
     r = requests.get(f"{BASE_URL}/?image_content={name}", timeout=60)
     r.raise_for_status()
@@ -113,4 +123,4 @@ def convertir_jp2_url_a_tiff(url: str, tiff_name: str) -> Path:
     return tiff_path
 
 # Ejemplo:
-buscar_imagen("crater")
+buscar_mision("mars*science*laboratory")
