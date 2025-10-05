@@ -2,6 +2,9 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+from time import sleep
 
 # IDs
 ID_PRINCIPAL = "left_nav_links"
@@ -10,15 +13,28 @@ ID_DATA_IMG = "indexlist"
 # URL principal
 URL_BASE = "https://pds-imaging.jpl.nasa.gov/volumes/mro.html"
 
+# url´s finales
+coleccion_imagenes = {}
+lock = threading.Lock()
+
 # Expresiones regulares
 rx_enlaces = re.compile(r"/volumes/mro/release(?P<num>\d+)\.html$")
 rx_imagenes = re.compile(r"/data/mro/ctx/mrox_\d{4}/$")
 
+# ----- util red -----
+# (opcional) una sesión por hilo para reusar conexiones TCP
+_thread_local = threading.local()
+def _session():
+    if not hasattr(_thread_local, "s"):
+        _thread_local.s = requests.Session()
+    return _thread_local.s
+
 def _obtener_sesion(url_base: str = URL_BASE) -> BeautifulSoup:
-    resp = requests.get(url_base, timeout=20)
+    resp = _session().get(url_base, timeout=20)
     resp.raise_for_status()
     return BeautifulSoup(resp.text, "html.parser")
 
+# ----- scraping -----
 def _obtener_tabla(soup: BeautifulSoup, id_tabla: str):
     tabla = soup.find(id=id_tabla)
     if not tabla:
@@ -26,29 +42,24 @@ def _obtener_tabla(soup: BeautifulSoup, id_tabla: str):
     return tabla
 
 def _obtener_elementos_tabla(tabla, tag: str, attr: str, er: re.Pattern, base_url: str):
-    """Devuelve URLs absolutas para los elementos tag[attr] cuyo attr matchee er."""
     elementos = []
     for el in tabla.select(f"{tag}[{attr}]"):  # p.ej. a[href]
-        val = el.get(attr, "").strip()        # p.ej. href
+        val = el.get(attr, "").strip()
         if val and er.search(val):
             elementos.append(urljoin(base_url, val))
     return elementos
 
 def obtener_versiones():
+    global coleccion_imagenes
     soup = _obtener_sesion(URL_BASE)
     tabla = _obtener_tabla(soup, ID_PRINCIPAL)
-    # Devuelve URLs absolutas a las releaseN.html
-    return _obtener_elementos_tabla(tabla, "a", "href", rx_enlaces, URL_BASE)
+    versiones = _obtener_elementos_tabla(tabla, "a", "href", rx_enlaces, URL_BASE)
+    for version in versiones:
+        key = version.split("/")[-1].replace(".html", "")
+        coleccion_imagenes[key] = []
+    return versiones  # URLs absolutas a releaseN.html
 
-def _obtener_elementos(
-    soup: BeautifulSoup,
-    id_table: str,
-    tag: str,
-    attr: str,
-    er: re.Pattern,
-    base_url: str,
-):
-    """Devuelve URLs absolutas encontradas en #id_table que hacen match con er."""
+def _obtener_elementos(soup: BeautifulSoup, id_table: str, tag: str, attr: str, er: re.Pattern, base_url: str):
     tabla = soup.find(id=id_table)
     if not tabla:
         return []
@@ -59,64 +70,78 @@ def _obtener_elementos(
             urls.append(urljoin(base_url, val))
     return urls
 
-def obtener_img(session, id_table):
-    REGEX_IMG = re.compile(r".+\.img$", re.I)  # acepta .img o .IMG
-    archivos_validos = []
+def obtener_img(session, id_table: str, key: str):
+    REGEX_IMG = re.compile(r".+\.img$", re.I)
+    global coleccion_imagenes
     tabla = session.find(id=id_table)
+    if not tabla:
+        return
     for fila in tabla.find_all("tr"):
         tds = fila.find_all("td")
         if len(tds) < 2:
             continue
-        link_tag = tds[1].find('a')
+        link_tag = tds[1].find("a")
         if not link_tag:
             continue
         nombre = link_tag.text.strip()
-        if REGEX_IMG.fullmatch(nombre):   # valida toda la cadena
-            archivos_validos.append(nombre)
-    return archivos_validos
+        if REGEX_IMG.fullmatch(nombre):
+            with lock:
+                coleccion_imagenes[key].append(nombre)
 
 def obtener_directorios(session, id_table):
-  directorios_validos = []
-  tabla = session.find(id=id_table)
+    directorios_validos = []
+    tabla = session.find(id=id_table)
+    if not tabla:
+        return directorios_validos
+    for fila in tabla.find_all("tr"):
+        tds = fila.find_all("td")
+        if len(tds) < 2:
+            continue
+        link_tag = tds[1].find("a")
+        if not link_tag:
+            continue
+        nombre = link_tag.text.strip()
+        if nombre.endswith("/"):
+            directorios_validos.append(nombre)
+    return directorios_validos
 
-  for fila in tabla.find_all("tr"):
-    tds = fila.find_all("td")
-    if len(tds) < 2:
-      continue
-    link_tag = tds[1].find('a')
-    if not link_tag:
-      continue
-    nombre = link_tag.text.strip()
-    if not nombre:
-      continue
-    if nombre.endswith('/'):
-      directorios_validos.append(nombre)
-  return directorios_validos
+def gestionar_directorios(urls, key):
+    # procesa todos los directorios de una release (secuencial dentro del hilo)
+    for url in urls:
+        try:
+            sesion = _obtener_sesion(url)
+            sesion = _obtener_sesion(f"{url}data/")
+            obtener_img(sesion, ID_DATA_IMG, key)
+        except Exception as e:
+            # registra pero no detiene el resto
+            print(f"[WARN] {key} -> {url}: {e}")
 
-
+# ----- MAIN con pool de hilos (relleno automático) -----
 if __name__ == "__main__":
-    versiones = obtener_versiones()  # p.ej. .../release1.html, .../release2.html, ...
-    imagenes = []
-    imagenes_bn = []
-    i = 0
-    for version_url in versiones:
-        soup_rel = _obtener_sesion(version_url)
-        # Aquí usamos como base_url LA PÁGINA DE LA RELEASE,
-        # para que urljoin haga bien la ruta absoluta.
-        dirs_ctx = _obtener_elementos(soup_rel, ID_PRINCIPAL, "a", "href", rx_imagenes, version_url)
-        print(dirs_ctx)
-        imagenes.extend(dirs_ctx)  # aplanamos en una sola lista
-        for imagen in imagenes:
-          sesion = _obtener_sesion(imagen)
-          directorios = obtener_directorios(sesion, ID_DATA_IMG)
-          print(directorios)
-          i+=1
-          print(i)
-    #       sesion = _obtener_sesion(f"{imagen}{directorios[2]}")
-    #       coleccion_imagenes = obtener_img(sesion, ID_DATA_IMG)
-    #       for img_href in coleccion_imagenes:
-    #         imagenes_bn.append(f"{imagen}{directorios[2]}{img_href}")
-    # print(imagenes_bn)
-  
-    
-    
+    versiones = obtener_versiones()
+
+    # Límite de hilos concurrentes (ajusta 5–10 según tu preferencia)
+    MAX_WORKERS = 10
+
+    futures = []
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+        for version_url in versiones:
+            key = version_url.split("/")[-1].replace(".html", "")
+            soup_rel = _obtener_sesion(version_url)
+            dirs_ctx = _obtener_elementos(soup_rel, ID_PRINCIPAL, "a", "href", rx_imagenes, version_url)
+
+            # Enviar tarea al pool (el pool ejecutará hasta MAX_WORKERS a la vez, y
+            # cuando termine una, toma la siguiente automáticamente)
+            futures.append(pool.submit(gestionar_directorios, dirs_ctx, key))
+
+        # (opcional) ir recogiendo resultados/errores conforme terminan
+        for fut in as_completed(futures):
+            try:
+                fut.result()  # propaga excepciones si las hubo
+            except Exception as e:
+                print("[ERROR hilo]", e)
+
+    print("Claves:", len(coleccion_imagenes))
+    # Si quieres ver cuántas imágenes por release:
+    # for k, v in coleccion_imagenes.items():
+    #     print(k, len(v))
