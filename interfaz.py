@@ -14,6 +14,14 @@ from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5.QtCore import Qt
 from PIL import Image
 import sys
+import herramientas.similitud
+
+
+
+diccionario = open("recursos/Diccionario.txt")
+
+palabras = diccionario.read()
+palabras = palabras.split(",")
 
 class ImageViewer(QtWidgets.QGraphicsView):
     zoomChanged = QtCore.pyqtSignal()
@@ -552,7 +560,7 @@ class Ui_MainWindow(object):
         self.zoomIn.clicked.connect(self.viewer.zoom_in)
         self.zoomOut.clicked.connect(self.viewer.zoom_out)
         self.refresh.clicked.connect(self.viewer.refresh_zoom)
-
+        self.lineEdit.returnPressed.connect(self.obtener_texto)
 
 
         self.bttnCursor.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.NoDrag))
@@ -572,13 +580,22 @@ class Ui_MainWindow(object):
         porcentaje = int(self.viewer.scale_factor*100)
         self.zoom.setText(f"{porcentaje}%")
 
+    def obtener_texto(self):
+        i = 0
+        busca = self.lineEdit.text()
+        print(len(palabras))
+        while i < len(palabras):
+            result = herramientas.similitud.compare(busca, palabras[i])
+            print(f"{palabras[i]} = {result}")
+            i +=1
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.lblTitulo.setText(_translate("MainWindow", "STELLAR PIXELS"))
         self.lineEdit.setText(_translate("MainWindow", "Buscar"))
-        self.label.setText(_translate("MainWindow", "Herramientas"))
+        self.label.setText(_translate("MainWindow", "Hserramientas"))
         self.bttnCursor.setText(_translate("MainWindow", "..."))
         self.bttnMover.setText(_translate("MainWindow", "..."))
         self.bttnCortar.setText(_translate("MainWindow", "..."))
@@ -605,6 +622,7 @@ class Ui_MainWindow(object):
 
 
 if __name__ == "__main__":
+
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
