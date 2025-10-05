@@ -114,14 +114,15 @@ def gestionar_directorios(urls, key):
             obtener_img(sesion, ID_DATA_IMG, key)
         except Exception as e:
             # registra pero no detiene el resto
-            print(f"[WARN] {key} -> {url}: {e}")
+            #print(f"[WARN] {key} -> {url}: {e}")
+            pass
 
 # ----- MAIN con pool de hilos (relleno automático) -----
 if __name__ == "__main__":
     versiones = obtener_versiones()
 
     # Límite de hilos concurrentes (ajusta 5–10 según tu preferencia)
-    MAX_WORKERS = 10
+    MAX_WORKERS = 30
 
     futures = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
@@ -141,7 +142,7 @@ if __name__ == "__main__":
             except Exception as e:
                 print("[ERROR hilo]", e)
 
-    print("Claves:", len(coleccion_imagenes))
+    print(coleccion_imagenes)
     # Si quieres ver cuántas imágenes por release:
     # for k, v in coleccion_imagenes.items():
     #     print(k, len(v))
