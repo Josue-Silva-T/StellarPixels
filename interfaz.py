@@ -33,7 +33,11 @@ class ImageViewer(QtWidgets.QGraphicsView):
         
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
+        
+        self.pixmap_item = None      # <-- guardaremos el item
+        self._crop_mode = False
+        self._rubber = None
+        self._origin = QtCore.QPoint()
 
     def zoom_in(self):
         zoom_factor = 1.25
@@ -56,7 +60,6 @@ class ImageViewer(QtWidgets.QGraphicsView):
         self.scale_factor = 1.0
         self.zoomChanged.emit()
         
-
     def load_image(self, image_path):
         """Carga una imagen TIFF con máxima calidad"""
         image = QtGui.QImage(image_path)
@@ -86,6 +89,19 @@ class ImageViewer(QtWidgets.QGraphicsView):
         self.scale(zoom_factor, zoom_factor)
         self.scale_factor *= zoom_factor
         self.zoomChanged.emit()
+        
+    def set_crop_mode(self, enabled: bool):
+        """Activa/Desactiva el modo recorte (QRubberBand)."""
+        self._crop_mode = enabled
+        if enabled:
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)  # evita pan
+            self.setCursor(Qt.CrossCursor)
+        if self._rubber is None:
+            self._rubber = QtWidgets.QRubberBand(QtWidgets.QRubberBand.Rectangle, self.viewport())
+        else:
+            self.setCursor(Qt.ArrowCursor)
+        if self._rubber:
+            self._rubber.hide()
 
 
 
@@ -108,8 +124,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.frameSuperior = QtWidgets.QFrame(self.centralwidget)
-        self.frameSuperior.setStyleSheet("background-color: rgb(24, 24, 24);\n"
-"")
+        self.frameSuperior.setStyleSheet("background-color: rgb(24, 24, 24);\n""")
         self.frameSuperior.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frameSuperior.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frameSuperior.setObjectName("frameSuperior")
@@ -450,8 +465,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.setStretch(1, 9)
         self.horizontalLayout.addWidget(self.panelCentral)
         self.panelScroll = QtWidgets.QFrame(self.framePaneles)
-        self.panelScroll.setStyleSheet("background:rgb(34, 34, 34)\n"
-"")
+        self.panelScroll.setStyleSheet("background:rgb(34, 34, 34)\n""")
         self.panelScroll.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.panelScroll.setFrameShadow(QtWidgets.QFrame.Raised)
         self.panelScroll.setObjectName("panelScroll")
@@ -482,10 +496,10 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        self.viewer.load_image("imagenes/marte.tiff")
-        self.viewer.resetTransform()
-        self.viewer.fitInView(self.viewer.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
-
+        self.viewer.load_image("Imagenes/marte.tiff")
+        self.viewer.refresh_zoom()
+        self.update_zoom_label()
+        
         self.zoomIn.clicked.connect(self.viewer.zoom_in)
         self.zoomOut.clicked.connect(self.viewer.zoom_out)
         self.refresh.clicked.connect(self.viewer.refresh_zoom)
@@ -494,6 +508,10 @@ class Ui_MainWindow(object):
 
         self.bttnCursor.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.NoDrag))
         self.bttnMover.clicked.connect(lambda: self.viewer.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag))
+        
+        # Ajusta la imagen bien
+        QtCore.QTimer.singleShot(0, lambda: (self.viewer.refresh_zoom(), self.update_zoom_label()))
+        
 
     def update_zoom_label(self):
         porcentaje = int(self.viewer.scale_factor*100)
