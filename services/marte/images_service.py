@@ -98,22 +98,25 @@ if __name__ == "__main__":
     versiones = obtener_versiones()  # p.ej. .../release1.html, .../release2.html, ...
     imagenes = []
     imagenes_bn = []
+    i = 0
     for version_url in versiones:
         soup_rel = _obtener_sesion(version_url)
         # Aquí usamos como base_url LA PÁGINA DE LA RELEASE,
         # para que urljoin haga bien la ruta absoluta.
         dirs_ctx = _obtener_elementos(soup_rel, ID_PRINCIPAL, "a", "href", rx_imagenes, version_url)
+        print(dirs_ctx)
         imagenes.extend(dirs_ctx)  # aplanamos en una sola lista
-        print(len(imagenes))
-        print(imagenes)
         for imagen in imagenes:
           sesion = _obtener_sesion(imagen)
           directorios = obtener_directorios(sesion, ID_DATA_IMG)
-          sesion = _obtener_sesion(f"{imagen}{directorios[2]}")
-          coleccion_imagenes = obtener_img(sesion, ID_DATA_IMG)
-          for img_href in coleccion_imagenes:
-            imagenes_bn.append(f"{imagen}{directorios[2]}{img_href}")
-    print(imagenes_bn)
+          print(directorios)
+          i+=1
+          print(i)
+    #       sesion = _obtener_sesion(f"{imagen}{directorios[2]}")
+    #       coleccion_imagenes = obtener_img(sesion, ID_DATA_IMG)
+    #       for img_href in coleccion_imagenes:
+    #         imagenes_bn.append(f"{imagen}{directorios[2]}{img_href}")
+    # print(imagenes_bn)
   
     
     
