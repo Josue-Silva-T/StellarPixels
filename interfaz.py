@@ -16,6 +16,7 @@ from PIL import Image, ImageEnhance
 import sys
 import herramientas.similitud
 import io
+import tifffile
 
 diccionario = open("recursos/Diccionario.txt")
 
@@ -656,8 +657,8 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-        self.viewer.load_image("imagenes/marte.tiff")
+        archivo = "imagenes\imagen2.tif"
+        self.viewer.load_image(archivo)
         self.viewer.refresh_zoom()
         self.update_zoom_label()
         
@@ -680,8 +681,21 @@ class Ui_MainWindow(object):
         
         # Ajusta la imagen correctamente al iniciar el programa
         QtCore.QTimer.singleShot(0, lambda: (self.viewer.refresh_zoom(), self.update_zoom_label()))
+
+        with tifffile.TiffFile(archivo) as tif:
+            for page in tif.pages:
+                dimension = page.shape
+        alto, ancho = dimension
+        self.update_Dimesiones(ancho,alto)
+        
         
 
+    def update_Dimesiones(self, ancho, alto):
+            self.anchoValor.setText(str(ancho))
+            self.altoValor.setText(str(alto))
+
+        
+    
     def update_zoom_label(self):
         porcentaje = int(self.viewer.scale_factor*100)
         self.zoom.setText(f"{porcentaje}%")
@@ -698,7 +712,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "STELLAR PIXELS | IMAGENES"))
         self.lblTitulo.setText(_translate("MainWindow", "STELLAR PIXELS"))
         self.lineEdit.setText(_translate("MainWindow", "Buscar"))
         self.label.setText(_translate("MainWindow", "Hserramientas"))
