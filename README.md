@@ -8,14 +8,14 @@ The viewer supports high-resolution TIFF files and provides tools for image navi
 The project is designed as a lightweight and accessible solution for working with high-resolution imagery, particularly useful for scientific, astronomical, and technical visualization.
 
 
-##zoom
-https://github.com/user-attachments/assets/3925c5ba-1693-4dc2-8189-deb2afca0699
+## zoom
+![zoom](https://github.com/user-attachments/assets/3925c5ba-1693-4dc2-8189-deb2afca0699)
 
-##move
-https://github.com/user-attachments/assets/d84d853b-a0fa-4a37-aa45-80f5c66ef34c
+## move
+![move](https://github.com/user-attachments/assets/d84d853b-a0fa-4a37-aa45-80f5c66ef34c)
 
-##cut
-https://github.com/user-attachments/assets/8a5ae622-657e-4975-8ac1-14894cb4aa86
+## cut
+![cut](https://github.com/user-attachments/assets/8a5ae622-657e-4975-8ac1-14894cb4aa86)
 
 
 
