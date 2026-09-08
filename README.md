@@ -9,14 +9,13 @@ The project is designed as a lightweight and accessible solution for working wit
 
 
 ## zoom
-![zoom](https://github.com/user-attachments/assets/3925c5ba-1693-4dc2-8189-deb2afca0699)
+<img width="1228" height="736" alt="zoom" src="https://github.com/user-attachments/assets/cafc9baa-02dd-4d9d-afb7-55b1a3647487" />
 
 ## move
-![move](https://github.com/user-attachments/assets/d84d853b-a0fa-4a37-aa45-80f5c66ef34c)
+<img width="1228" height="736" alt="move" src="https://github.com/user-attachments/assets/d4dd8b4e-c185-4863-9678-f60036445983" />
 
 ## cut
-![cut](https://github.com/user-attachments/assets/8a5ae622-657e-4975-8ac1-14894cb4aa86)
-
+<img width="1228" height="736" alt="cut" src="https://github.com/user-attachments/assets/a3022a5a-9e06-4882-b712-5006c58538c0" />
 
 
 
